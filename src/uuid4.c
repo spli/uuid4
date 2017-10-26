@@ -13,6 +13,10 @@
 #include <wincrypt.h>
 #endif
 
+#if defined(ESP32)
+#include "esp_system.h"
+#endif
+
 #include "uuid4.h"
 
 
@@ -57,7 +61,13 @@ static int init_seed(void) {
   if (!res) {
     return UUID4_EFAILURE;
   }
-
+ #elif defined(ESP32)
+  uint32_t seeds[4];
+  for (int i = 0; i < 4; i++) {
+      seeds[i] = esp_random();
+  }
+  seed[0] =  (uint64_t)seeds[0] << 32 | seeds[1];
+  seed[1] =  (uint64_t)seeds[2] << 32 | seeds[3];
 #else
   #error "unsupported platform"
 #endif
